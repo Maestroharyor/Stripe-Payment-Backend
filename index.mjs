@@ -53,10 +53,10 @@ function mapToNewFormat(inputArray) {
 app.post("/create-checkout-session", async (req, res) => {
   const { items, cancel_url, success_url } = req.body;
 
-  if (!items || items.length) {
+  if (!items || !items.length) {
     return res.status(400).send({
       success: false,
-      message: "Cart Items not found",
+      message: "Cart Items not found or valid",
     });
   }
 
