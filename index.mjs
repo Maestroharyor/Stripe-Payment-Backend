@@ -1,5 +1,6 @@
 import express from "express";
 import stripeSDK from "stripe";
+import cors from "cors";
 const app = express();
 // This is a public sample test API key.
 // Don’t submit any personally identifiable information in requests made with this key.
@@ -8,6 +9,7 @@ const stripe = stripeSDK("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
 
 app.use(express.static("public"));
 app.use(express.json());
+app.use(cors());
 
 const calculateOrderAmount = (items) => {
   let totalAmount = 0;
