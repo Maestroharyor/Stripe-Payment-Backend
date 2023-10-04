@@ -35,25 +35,58 @@ app.get("/", (req, res) => {
   });
 });
 
-app.post("/create-payment-intent", async (req, res) => {
-  const { items } = req.body;
+function mapToNewFormat(inputArray) {
+  return inputArray.map((item) => {
+    return {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: item.title,
+        },
+        unit_amount: item.price * 100, // Assuming the price is in dollars (convert to cents)
+      },
+      quantity: item.quantity,
+    };
+  });
+}
 
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(items),
-    currency: "usd",
-    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-    automatic_payment_methods: {
-      enabled: true,
-    },
+app.post("/create-checkout-session", async (req, res) => {
+  const { items, cancel_url, success_url } = req.body;
+
+  if (!items || items.length) {
+    return res.status(400).send({
+      success: false,
+      message: "Cart Items not found",
+    });
+  }
+
+  if (!cancel_url) {
+    return res.status(400).send({
+      success: false,
+      message: "Cancel URL not sent",
+    });
+  }
+
+  if (!success_url) {
+    return res.status(400).send({
+      success: false,
+      message: "Success URL not sent",
+    });
+  }
+
+  const line_items = mapToNewFormat(items);
+
+  const session = await stripe.checkout.sessions.create({
+    line_items,
+    mode: "payment",
+    success_url,
+    cancel_url,
   });
 
   res.send({
     success: true,
-    message: "Payment intent created",
-    data: {
-      clientSecret: paymentIntent.client_secret,
-    },
+    message: "Session URL Created Successfully",
+    data: { url: session.url },
   });
 });
 
