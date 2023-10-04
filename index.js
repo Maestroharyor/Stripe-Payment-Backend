@@ -27,6 +27,12 @@ const calculateOrderAmount = (items) => {
   return totalAmount;
 };
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Hello World!",
+  });
+});
+
 app.post("/create-payment-intent", async (req, res) => {
   const { items } = req.body;
 
